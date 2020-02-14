@@ -15,6 +15,7 @@
 -- Escriba el resultado a la carpeta `output` del directorio actual.
 -- 
 fs -rm -f -r output;
+fs -put -f data.csv;
 --
 u = LOAD 'data.csv' USING PigStorage(',') 
     AS (id:int, 
@@ -26,3 +27,17 @@ u = LOAD 'data.csv' USING PigStorage(',')
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+
+v = FOREACH u GENERATE $2 AS apellido, SIZE($2) AS longitud; 
+
+w = ORDER v BY longitud DESC,apellido ASC;
+
+x = LIMIT w 5;
+
+-- DUMP w;
+
+-- escribe el archivo de salida
+STORE x INTO 'output' USING PigStorage(',');
+
+-- copia los archivos del HDFS al sistema local
+fs -get -f output/ .

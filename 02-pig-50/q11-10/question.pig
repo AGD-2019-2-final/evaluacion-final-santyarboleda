@@ -28,6 +28,10 @@
 -- 
 fs -rm -f -r output;
 --
+
+-- subimos el archivo a HDFS
+fs -put -f data.csv
+
 u = LOAD 'data.csv' USING PigStorage(',') 
     AS (id:int, 
         firstname:CHARARRAY, 
@@ -38,3 +42,12 @@ u = LOAD 'data.csv' USING PigStorage(',')
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+v = FOREACH u GENERATE $2, UPPER($2), LOWER($2);
+
+w = ORDER v BY $0;
+
+-- escribe el archivo de salida
+STORE w INTO 'output' USING PigStorage(',');
+
+-- copia los archivos del HDFS al sistema local
+fs -get -f output/ .

@@ -39,5 +39,19 @@ LOAD DATA LOCAL INPATH 'tbl1.csv' INTO TABLE tbl1;
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+!hdfs dfs -rm -r -f /tmp/output;
 
+
+INSERT OVERWRITE DIRECTORY '/tmp/output/'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' 
+
+SELECT c2, concatenacion
+FROM
+(SELECT c2, concat_ws(':',collect_list(CAST(c1 as STRING))) AS concatenacion
+FROM
+tbl0 
+
+GROUP BY c2) t;
+
+!hadoop fs -copyToLocal /tmp/output output;
 

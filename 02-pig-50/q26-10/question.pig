@@ -16,6 +16,8 @@
 -- Escriba el resultado a la carpeta `output` del directorio actual.
 -- 
 fs -rm -f -r output;
+-- subimos el archivo a HDFS
+fs -put -f data.csv
 --
 u = LOAD 'data.csv' USING PigStorage(',') 
     AS (id:int, 
@@ -27,3 +29,13 @@ u = LOAD 'data.csv' USING PigStorage(',')
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+v = FILTER u BY (SUBSTRING($1, 0, 1) >= UPPER('m'));
+                     
+w = FOREACH v GENERATE $1;
+
+
+-- escribe el archivo de salida
+STORE w INTO 'output' USING PigStorage(',');
+
+-- copia los archivos del HDFS al sistema local
+fs -get -f output/ .    

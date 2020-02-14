@@ -40,4 +40,19 @@ LOAD DATA LOCAL INPATH 'tbl1.csv' INTO TABLE tbl1;
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
 
+!hdfs dfs -rm -r -f /tmp/output;
 
+INSERT OVERWRITE DIRECTORY '/tmp/output/'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+
+
+SELECT MAY
+FROM
+(SELECT c1, concat_ws(':',collect_list(UPPER(exploded))) AS MAY
+FROM
+tbl0 
+LATERAL VIEW explode(c5) exploded_table AS exploded
+GROUP BY c1) t;
+
+
+!hadoop fs -copyToLocal /tmp/output output;

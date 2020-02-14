@@ -24,3 +24,16 @@ LOAD DATA LOCAL INPATH 'data.tsv' INTO TABLE t0;
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
 
+!hdfs dfs -rm -r -f /tmp/output;
+
+INSERT OVERWRITE DIRECTORY '/tmp/output/'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT key, COUNT(key)
+FROM
+t0
+LATERAL VIEW explode(c3) exploded_table 
+GROUP BY key
+;
+
+
+!hadoop fs -copyToLocal /tmp/output output;

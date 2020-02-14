@@ -40,5 +40,20 @@ LOAD DATA LOCAL INPATH 'tbl1.csv' INTO TABLE tbl1;
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+!hdfs dfs -rm -r -f /tmp/output;
+
+
+INSERT OVERWRITE DIRECTORY '/tmp/output/'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' 
+
+SELECT c2, sum(value)
+FROM tbl0
+LATERAL VIEW explode(c6) exp
+GROUP BY c2;
+
+!hadoop fs -copyToLocal /tmp/output output;
+
+
+
 
 

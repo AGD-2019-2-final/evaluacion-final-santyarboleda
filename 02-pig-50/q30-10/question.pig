@@ -29,15 +29,38 @@
 -- Escriba el resultado a la carpeta `output` del directorio actual.
 -- 
 fs -rm -f -r output;
+-- subimos el archivo a HDFS
+fs -put -f data.csv
 --
 u = LOAD 'data.csv' USING PigStorage(',') 
     AS (id:int, 
         firstname:CHARARRAY, 
         surname:CHARARRAY, 
-        birthday:CHARARRAY, 
+        birthday:DATETIME, 
         color:CHARARRAY, 
         quantity:INT);
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+w = FOREACH u GENERATE ToString($3, 'YYYY-MM-dd'),  ToString($3, 'dd'), ToString($3, 'd'), (CASE LOWER(ToString($3, 'EEE'))
+                                                                                                  WHEN 'mon' THEN 'lun'
+                                                                                                  WHEN 'tue' THEN 'mar'
+                                                                                                  WHEN 'wed' THEN 'mie'
+                                                                                                  WHEN 'thu' THEN 'jue'
+                                                                                                  WHEN 'fri' THEN 'vie'
+                                                                                                  WHEN 'sat' THEN 'sab'
+                                                                                                  ELSE 'dom'   
+                                                                                                 END), (CASE LOWER(ToString($3, 'EEEEE'))
+                                                                                                  WHEN 'monday' THEN 'lunes'
+                                                                                                  WHEN 'tuesday' THEN 'martes'
+                                                                                                  WHEN 'wednesday' THEN 'miercoles'
+                                                                                                  WHEN 'thursday' THEN 'jueves'
+                                                                                                  WHEN 'friday' THEN 'viernes'
+                                                                                                  WHEN 'saturday' THEN 'sabado'
+                                                                                                  ELSE 'domingo'   
+                                                                                                END   );
+-- escribe el archivo de salida
+STORE w INTO 'output' USING PigStorage(',');
 
+-- copia los archivos del HDFS al sistema local
+fs -get -f output/ . 
